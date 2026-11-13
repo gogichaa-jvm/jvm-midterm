@@ -1,0 +1,322 @@
+
+## 0. ჯერ ეს — Main.java (task1 და task2)
+
+```java
+public class Main {
+    public static void main(String[] args) {
+        task1();
+        task2();
+    }
+
+    public static void task1() {
+        System.out.println("Task 1");
+        // პირველი დავალების ობიექტები და მეთოდები აქ
+    }
+
+    public static void task2() {
+        System.out.println("Task 2");
+        // მეორე დავალების ობიექტები და მეთოდები აქ
+    }
+}
+```
+
+თუ `task2()` ჯერ არ გაქვს, შეგიძლია `main`-ში მისი გამოძახება დროებით დააკომენტარო: `// task2();`.
+
+## 1. თუ წერია „abstract class“ — მშობელი კლასი
+
+მაგალითი: `WeatherStation.java`
+
+```java
+public abstract class WeatherStation {
+    String stationName;
+    String location;
+    double temperature;
+    double humidity;
+
+    public WeatherStation(String stationName, String location,
+                          double temperature, double humidity) {
+        this.stationName = stationName;
+        this.location = location;
+        this.temperature = temperature;
+        this.humidity = humidity;
+    }
+
+    public WeatherStation(String stationName, String location) {
+        this(stationName, location, 0, 0);
+    }
+
+    public WeatherStation() {
+        this("Random", "Unknown", Math.random() * 40, Math.random() * 100);
+    }
+
+    public void recordMeasurement(double temperature, double humidity) {
+        this.temperature = temperature;
+        this.humidity = humidity;
+        System.out.println("New data recorded for: " + stationName);
+    }
+
+    public abstract void analyzeData(double... dataPoints);
+}
+```
+
+**რა შეცვალო:** კლასის სახელი, ველების სახელები, ტიპები, კონსტრუქტორის პარამეტრები, მეთოდების სახელები — ზუსტად დავალების მიხედვით.
+
+## 2. თუ წერია „შვილობილი კლასი“, `extends`, `super`, `@Override`
+
+მაგალითი: `UrbanWeatherStation.java`
+
+```java
+public class UrbanWeatherStation extends WeatherStation {
+    double trafficImpact;
+
+    public UrbanWeatherStation(String name, String location,
+                               double temperature, double humidity,
+                               double trafficImpact) {
+        super(name, location, temperature, humidity);
+        this.trafficImpact = trafficImpact;
+    }
+
+    @Override
+    public void analyzeData(double... dataPoints) {
+        if (dataPoints.length == 0) {
+            System.out.println("No data");
+            return;
+        }
+        double sum = 0;
+        for (double number : dataPoints) {
+            sum += number;
+        }
+        System.out.println("Average temperature: " + sum / dataPoints.length);
+    }
+}
+```
+
+**გაითვალისწინე:** თუ მშობელში `abstract` მეთოდია, შვილობილმა უნდა განახორციელოს, თორემ კომპილაცია ვერ მოხდება. ცარიელი მეთოდი მხოლოდ კომპილაციას აგვარებს და დავალების ფუნქციონალს არ ასრულებს.
+
+### Main-ში WeatherStation-ის გაშვება
+
+```java
+public static void task1() {
+    UrbanWeatherStation station =
+            new UrbanWeatherStation("Station1", "Tbilisi", 20, 60, 5);
+    station.recordMeasurement(25, 70);
+    station.analyzeData(10, 20, 30);
+}
+```
+
+## 3. თუ წერია „მასივი“, `String[]`, ფუნქციების დამატება
+
+```java
+String[] enabledFunctions = new String[3];
+enabledFunctions[0] = "Light";
+System.out.println(enabledFunctions[0]);
+```
+
+მასივში პირველი ელემენტის ინდექსია **0**. თუ ზომაა 3, ინდექსებია 0, 1, 2.
+
+### მარტივი დამატება თავისუფალ ადგილზე
+
+```java
+public void enableFunction(String functionName) {
+    for (int i = 0; i < enabledFunctions.length; i++) {
+        if (enabledFunctions[i] == null) {
+            enabledFunctions[i] = functionName;
+            System.out.println(functionName + " enabled");
+            return;
+        }
+    }
+    System.out.println("No free space");
+}
+```
+
+ეს მეთოდი უნდა იყოს იმ კლასში, სადაც `enabledFunctions` ველი გაქვს.
+
+## 4. თუ წერია „Scanner“, „while“, „exit“ — Todo.java
+
+```java
+import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
+
+public class Todo {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        int count = 0;
+
+        while (true) {
+            System.out.println("Enter task (or exit):");
+            String text = scanner.nextLine();
+
+            if (text.equalsIgnoreCase("exit")) {
+                System.out.println("Added: " + count);
+                break;
+            }
+            if (text.trim().isEmpty()) {
+                System.out.println("Empty task");
+                continue;
+            }
+
+            try {
+                FileWriter writer = new FileWriter("todo_list.txt", true);
+                writer.write(text + System.lineSeparator());
+                writer.close();
+                count++;
+                System.out.println("Saved");
+            } catch (IOException e) {
+                System.out.println(e.getMessage());
+            }
+        }
+        scanner.close();
+    }
+}
+```
+
+ეს **ნაწილობრივი** Todo გადაწყვეტაა: ტექსტის დამატება, ცარიელი ველის შემოწმება, `exit`, ამ გაშვების დათვლა. **არ აქვს** ძველი ფაილის დათვლა და `delete`.
+
+## 5. თუ წერია „ფაილში ჩაწერა“ — FileWriter
+
+ზემოთ დაამატე:
+
+```java
+import java.io.FileWriter;
+import java.io.IOException;
+```
+
+მეთოდის შიგნით:
+
+```java
+try {
+    FileWriter writer = new FileWriter("weather_report.txt", true);
+    writer.write("Report" + System.lineSeparator());
+    writer.close();
+} catch (IOException e) {
+    System.out.println(e.getMessage());
+}
+```
+
+- `true` = ფაილის ბოლოში დამატება, ძველის შენარჩუნება.
+- `new FileWriter("file.txt")` = ძველი შიგთავსის გადაწერა.
+- შეცვალე ფაილის სახელი და დასაწერი ტექსტი დავალების მიხედვით.
+
+## 6. თუ წერია „ფაილის წაკითხვა“ — BufferedReader
+
+```java
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+
+try {
+    BufferedReader reader = new BufferedReader(new FileReader("todo_list.txt"));
+    String line;
+    int count = 0;
+    while ((line = reader.readLine()) != null) {
+        System.out.println(line);
+        count++;
+    }
+    reader.close();
+    System.out.println("Total: " + count);
+} catch (IOException e) {
+    System.out.println(e.getMessage());
+}
+```
+
+ეს კოდი ჩასვი მეთოდის შიგნით, არა კლასის პირდაპირ სხეულში.
+
+## 7. თუ წერია „შეცდომის დამუშავება“ — try/catch
+
+```java
+try {
+    int number = Integer.parseInt("abc");
+} catch (NumberFormatException e) {
+    System.out.println("Invalid number");
+}
+```
+
+შეყვანის მაგალითი: `Integer.parseInt(scanner.nextLine())`. უარყოფითის შემოწმება: `if (number < 0) { System.out.println("Invalid"); }` — მარტო შეტყობინება მნიშვნელობას არ ასწორებს.
+
+## 8. თუ წერია „SmartDevice“ — სწრაფი საწყისი კოდი
+
+`SmartDevice.java`:
+
+```java
+public abstract class SmartDevice {
+    String deviceName;
+    int maxFunctions;
+    boolean isActive;
+    String[] enabledFunctions;
+
+    public SmartDevice(String deviceName, int maxFunctions) {
+        this.deviceName = deviceName;
+        this.maxFunctions = maxFunctions;
+        this.enabledFunctions = new String[maxFunctions];
+        this.isActive = true;
+        System.out.println(deviceName + " turned on");
+    }
+
+    public abstract void disableFunctions(String... names);
+}
+```
+
+`SmartLight.java`:
+
+```java
+public class SmartLight extends SmartDevice {
+    String os;
+
+    public SmartLight(String name, int maxFunctions, String os) {
+        super(name, maxFunctions);
+        this.os = os;
+    }
+
+    @Override
+    public void disableFunctions(String... names) {
+        for (String name : names) {
+            for (int i = 0; i < enabledFunctions.length; i++) {
+                if (name.equals(enabledFunctions[i])) {
+                    enabledFunctions[i] = null;
+                }
+            }
+        }
+    }
+}
+```
+
+`Main.java`-ის `task1()`-ში:
+
+```java
+SmartLight light = new SmartLight("Lamp", 3, "Android");
+System.out.println(light.deviceName);
+System.out.println(light.os);
+```
+
+**ესეც ნაწილობრივი SmartDevice გადაწყვეტაა**, ყველა მოთხოვნას არ ფარავს.
+
+## 9. შეცდომების სწრაფი სია
+
+| IntelliJ შეცდომა | რას ამოწმებ |
+|---|---|
+| `Cannot resolve symbol Scanner` | `import java.util.Scanner;` |
+| `Cannot resolve symbol FileWriter` | `import java.io.FileWriter;` |
+| `IOException` | `import java.io.IOException;` და `try/catch` |
+| `Class must implement abstract method` | შვილობილ კლასში აკლია `@Override` მეთოდი |
+| `constructor cannot be applied` | `new Class(...)` პარამეტრები არ ემთხვევა კონსტრუქტორს |
+| `main method not found` | `public static void main(String[] args)` |
+| `class X is public, should be declared in X.java` | ფაილის სახელი და კლასის სახელი უნდა ემთხვეოდეს |
+
+## 10. ლექტორის GitHub — სად შევიდე
+
+- `abstract`: https://github.com/nikajordania/java-lectures-2026/blob/main/src/lecture_2/abstraction/Shape.java
+- `this`, კონსტრუქტორი, მემკვიდრეობა: https://github.com/nikajordania/java-lectures-2026/blob/main/src/lecture_2/inheritance/Character.java
+- ფაილში ჩაწერა: https://github.com/nikajordania/java-lectures-2026/blob/main/src/lecture_5/io/AppendTextToFile.java
+- ფაილის წაკითხვა: https://github.com/nikajordania/java-lectures-2026/blob/main/src/lecture_5/io/BufferedReaderExample.java
+
+## 11. გამოცდაზე რიგითობა
+
+1. შექმენი მოთხოვნილი `.java` ფაილები, სწორად დაარქვი სახელები.
+2. დაწერე ველები და კონსტრუქტორები.
+3. დაამატე `abstract`, `extends`, `super`, `@Override` საჭიროების მიხედვით.
+4. შექმენი `Main` და `task1()` / `task2()`; ობიექტები გამოიძახე.
+5. გაუშვი **Run** და შეასწორე კომპილაციის შეცდომები.
+6. დარჩენილი დრო გამოიყენე ფაილის ჩაწერაზე, წაკითხვაზე და რთულ მეთოდებზე.
+
+**შენიშვნა:** ეს ფაილი არის სასწავლო შაბლონების კრებული; ყველა ბლოკი ერთად ერთ Java ფაილში არ უნდა ჩასვა. თითო მაგალითი შესაბამის კლასსა და მეთოდში ჩასვი. გამოიყენე მხოლოდ იმ წესების ფარგლებში, რასაც გამოცდა უშვებს.
